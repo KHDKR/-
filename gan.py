@@ -1,5 +1,5 @@
 # %% [markdown]
-# 对抗算法
+# 导入基本库
 
 # %%
 import cv2
@@ -11,22 +11,27 @@ import matplotlib.pyplot as plt
 from matplotlib import style
 style.use('ggplot')
 
+# %% [markdown]
+# 基本参数
+
 # %%
-SIZE = 10
-EPISODES = 30000
-SHOW_EVERY = 3000
+# 基本参数
+SIZE = 10 # 场景范围
+EPISODES = 30000 # 训练轮数
+SHOW_EVERY = 3000 # 每次展示的轮数
 
-FOOD_REWARD = 25
-ENEMY_PENALTY = 300
-MOVE_PENALTY = 1
+FOOD_REWARD = 25 # 食物奖励
+ENEMY_PENALTY = 300 # 遇敌惩罚
+MOVE_PENALTY = 1 # 移动惩罚
 
-epsilon = 0.6
-EPS_DECAY = 0.9998
-DISCOUNT = 0.95
-LEARNING_RATE = 0.1
+epsilon = 0.6 # 随机概率
+EPS_DECAY = 0.9998 # 随机概率下降
+DISCOUNT = 0.95 # 学习折扣
+LEARNING_RATE = 0.1 # 学习率
 
-q_table = None
+q_table = None #qtable文件名
 
+# 颜色
 d = {1:(255,0,0), #blue
      2:(0,255,0), #green
      3:(0,0,255)} #red
@@ -35,7 +40,12 @@ PLAYER_N = 1
 FOOD_N = 2
 ENEMY_N = 3
 
+
+# %% [markdown]
+# 建立类
+
 # %%
+# 建立类
 class Cube:
     def __init__(self,name) -> None:
         self.name = name
@@ -79,6 +89,10 @@ class Cube:
         elif self.y >= SIZE:
             self.y = SIZE - 1
 
+
+# %% [markdown]
+# 判断qtable是否存在，不存在就新建，存在则从文件拉取
+
 # %%
 if q_table is None:
     q_table = {}
@@ -90,6 +104,10 @@ if q_table is None:
 else:
     with open(q_table,'rb') as f:
         q_table = pickle.load(f)
+
+
+# %% [markdown]
+# 训练过程
 
 # %%
 episode_rewards = []
@@ -137,6 +155,8 @@ for episode in range(EPISODES):
         
         q_table[obs][action] = new_q
         
+
+        '''绘制训练图像'''
         # if show:
         #     player = Cube('player')
         #     food = Cube('food')
@@ -162,7 +182,12 @@ for episode in range(EPISODES):
         
     episode_rewards.append(episode_reward)
     epsilon *= EPS_DECAY
-    
+
+# %% [markdown]
+# 绘制训练结果图
+
+# %%
+# plot rewards
 moving_avg = np.convolve(episode_rewards,np.ones((SHOW_EVERY,))/SHOW_EVERY,mode='valid')
 print(len(moving_avg))
 plt.plot([i for i in range(len(moving_avg))],moving_avg)
@@ -171,6 +196,11 @@ plt.ylabel(f'mean {SHOW_EVERY} reward')
 plt.figure().set_size_inches(6,8)
 plt.show()
 
+# %% [markdown]
+# 保存qtable
+
+# %%
+# save qtable
 with open(f'qtable_{int(time.time())}.pickle','wb') as f:
     pickle.dump(q_table,f)
 
@@ -192,6 +222,7 @@ with open(f'qtable_{int(time.time())}.pickle','wb') as f:
 # if cv2.waitKey(500) & 0xFF == ord('q'):
 #     pass
 
+
 # %%
 # moving_avg = np.convolve(episode_rewards,np.ones((SHOW_EVERY,))/SHOW_EVERY,mode='valid')
 # print(len(moving_avg))
@@ -201,6 +232,5 @@ with open(f'qtable_{int(time.time())}.pickle','wb') as f:
 # # plt.figure().set_size_inches(12,16)
 # plt.figure(dpi=200)
 # plt.show()
-# %%
 
-# %%
+
